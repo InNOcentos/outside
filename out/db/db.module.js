@@ -9,19 +9,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DbModule = void 0;
 const common_1 = require("@nestjs/common");
 const pg_1 = require("pg");
+const constants_1 = require("../constants");
 const dbProvider = {
-    provide: "PG_CONNECTION",
+    provide: constants_1.PG_CONNECTION,
     useValue: new pg_1.Pool({
-        user: process.env.POSTGRES_USER,
-        host: process.env.POSTGRES_HOST || 'localhost',
-        password: process.env.POSTGRES_PASSWORD,
-        database: process.env.POSTGRES_DATABASE,
+        connectionString: `postgres://${process.env.POSTGRES_USER}:${process.env.POSTGRES_PASSWORD}@db:5432/${process.env.POSTGRES_DB}`,
         connectionTimeoutMillis: 56 * 1000,
         idleTimeoutMillis: 56 * 1000,
         max: 26
     })
 };
-console.log(2);
 let DbModule = class DbModule {
 };
 DbModule = __decorate([

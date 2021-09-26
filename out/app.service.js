@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppService = void 0;
 const common_1 = require("@nestjs/common");
+const constants_1 = require("./constants");
 let AppService = class AppService {
     constructor(conn) {
         this.conn = conn;
@@ -25,7 +26,7 @@ let AppService = class AppService {
 };
 AppService = __decorate([
     (0, common_1.Injectable)(),
-    __param(0, (0, common_1.Inject)("PG_CONNECTION")),
+    __param(0, (0, common_1.Inject)(constants_1.PG_CONNECTION)),
     __metadata("design:paramtypes", [Object])
 ], AppService);
 exports.AppService = AppService;
