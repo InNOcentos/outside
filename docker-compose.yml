@@ -1,0 +1,25 @@
+version: "3.7"
+services:
+  db:
+    image: postgres:12
+    networks: ['webnet']
+    environment:
+      POSTGRES_HOST: psqlhost
+      POSTGRES_USER: psqluser
+      POSTGRES_PASSWORD: psqlpassword
+      POSTGRES_DB: psqldb
+
+    ports:
+        - "5432:5432"
+  web:
+    image: bs/outside:4
+    ports:
+      - 8080:3000
+    networks: ['webnet']
+    environment:
+      - POSTGRES_HOST=psqlhost
+      - POSTGRES_USER=psqluser
+      - POSTGRES_PASSWORD=psqlpassword
+      - POSTGRES_DB=psqldb
+networks:
+  webnet:
