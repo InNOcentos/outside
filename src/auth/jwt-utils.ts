@@ -6,27 +6,27 @@ import {
     JWT_REFRESH_TOKEN_SECRET,
     JWT_ACCESS_TOKEN_LIFETIME,
     JWT_REFRESH_TOKEN_LIFETIME
-} from './constants'
+} from './constants';
 
 @Injectable()
 export class JWTUtil {
     constructor (private readonly jwtService: JwtService) { }
 
     decode(jwt: string): { email: string, nickname: string, uid: string } {
-        return this.jwtService.decode(jwt, { json: true }) as { email: string, nickname: string, uid: string }
+        return this.jwtService.decode(jwt, { json: true }) as { email: string, nickname: string, uid: string };
     }
 
     getAccessTokenConfig() {
         return {
             secret: '123',
             expiresIn: JWT_ACCESS_TOKEN_LIFETIME
-        }
+        };
     }
 
     getRefreshTokenConfig() {
         return {
             secret: '123',
             expiresIn: JWT_REFRESH_TOKEN_LIFETIME
-        }
+        };
     }
 }

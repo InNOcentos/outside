@@ -3,7 +3,7 @@ import { ApiOperation, ApiProperty, ApiResponse, ApiTags } from '@nestjs/swagger
 import { GetTagsQueryParamsDto } from './dto/get-tags-query-params.dto';
 import { TagDto } from './dto/post-tag.dto';
 import { TagsService } from './tags.service';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard'
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('Тэги')
 @Controller('tag')
