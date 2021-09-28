@@ -13,7 +13,7 @@ import { AuthService } from './auth.service';
         forwardRef(()=> UsersModule),
         forwardRef(()=> DbModule),
         JwtModule.register({
-            privateKey: process.env.PRIVATE_KEY || 'SECRET',
+            secret: process.env.PRIVATE_KEY || 'SECRET',
             signOptions: {
                 expiresIn: '30m'
             }

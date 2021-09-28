@@ -16,6 +16,7 @@ export class AuthController {
         return this.authService.login(loginUserDto);
     }
 
+    @ApiOperation({ summary: 'Регистрация' })
     @Post('/signin')
     signin(@Body() createUserDto: CreateUserDto) {
         return this.authService.signin(createUserDto);

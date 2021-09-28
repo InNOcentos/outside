@@ -8,3 +8,5 @@ CREATE TABLE outside.user (
     nickname varchar(30),
     CONSTRAINT  pkey_tbl PRIMARY KEY (uid)
     ) WITH (OIDS=FALSE);
+
+CREATE TABLE outside.tag (id SERIAL, creator uuid, name  varchar(40), sortOrder int DEFAULT 0);
