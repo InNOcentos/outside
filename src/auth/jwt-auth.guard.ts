@@ -5,9 +5,9 @@ import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-    constructor(private jwtService: JwtService, private reflector: Reflector) {}
+    constructor (private jwtService: JwtService, private reflector: Reflector) { }
 
-    canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean>{
+    canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
         try {
             const req = context.switchToHttp().getRequest();
             const authHeaders = req.headers.authorization.split(' ');

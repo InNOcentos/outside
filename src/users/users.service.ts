@@ -4,7 +4,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
 export class UsersService {
-    constructor(@Inject(PG_CONNECTION) private readonly pool: any) {}
+    constructor (@Inject(PG_CONNECTION) private readonly pool: any) { }
 
     async createUser(createUserDto: CreateUserDto) {
         const { email, password, nickname } = createUserDto;
@@ -19,7 +19,7 @@ export class UsersService {
         return user;
     }
 
-    async getUserById(id: number) {
+    async getUserById(id: string) {
         console.log(id);
         const user = (await this.pool.query('SELECT email, nickname FROM outside.user WHERE uid = $1', [id]))?.rows[0];
         const userTags = (await this.pool.query('SELECT id, name, sortOrder FROM outside.tag WHERE creator = $1', [id]))?.rows;
@@ -30,11 +30,11 @@ export class UsersService {
         };
     }
 
-    async deleteUserById(id: number) {
+    async deleteUserById(id: string) {
         return (await this.pool.query('DELETE FROM outside.user WHERE uid = $1 RETURNING uid', [id]))?.rows[0];
     }
 
-    async updateUserById(id: number, newUserData: CreateUserDto): Promise<{email: string, nickname: string}> {
+    async updateUserById(id: string, newUserData: CreateUserDto): Promise<{ email: string, nickname: string }> {
         if (!Object.keys(newUserData).length) return;
         const { email, nickname, password } = newUserData;
         const getMatches = (await this.pool.query('SELECT uid FROM outside.user WHERE email = $1 OR nickname = $2', [email, nickname]))?.rowCount;

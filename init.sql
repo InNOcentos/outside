@@ -9,4 +9,4 @@ CREATE TABLE outside.user (
     CONSTRAINT  pkey_tbl PRIMARY KEY (uid)
     ) WITH (OIDS=FALSE);
 
-CREATE TABLE outside.tag (id SERIAL, creator uuid, name  varchar(40), sortOrder int DEFAULT 0);
+CREATE TABLE outside.tag (id SERIAL, creator uuid, name  varchar(40), sortOrder int DEFAULT 0, UNIQUE(name));

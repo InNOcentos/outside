@@ -1,56 +1,53 @@
-import { Controller, Post, Body, Get, Query, Delete, Put, Param, Headers } from '@nestjs/common';
+import { Controller, Post, Body, Get, Query, Delete, Put, Param, Headers, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiProperty, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { CreateUserDto } from 'src/users/dto/create-user.dto';
-import { LoginUserDto } from 'src/users/dto/login-user.dto';
 import { GetTagsQueryParamsDto } from './dto/get-tags-query-params.dto';
 import { TagDto } from './dto/post-tag.dto';
 import { TagsService } from './tags.service';
-import { JWTUtil } from 'src/users/users.decorator';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard'
 
 @ApiTags('Тэги')
-@Controller('auth')
+@Controller('tag')
 export class TagsControllers {
     constructor (private tagsService: TagsService,
-        private readonly jwtUtil: JWTUtil,
-    ) {}
-
-    @ApiOperation({ summary: 'Создание тэга' })
-    @ApiResponse({ status: 200 })
-    @Post('/tag')
-    create(@Headers('authorization') auth: string, @Body() tagDto: TagDto) {
-        const user = this.jwtUtil.decode(auth);
-        return this.tagsService.createTag(user?.uid, tagDto);
-    }
+    ) { }
 
     @ApiOperation({ summary: 'Получение тэга' })
     @ApiResponse({ status: 200 })
-    @Get('/tag:id')
-    getOne(@Headers('authorization') auth: string, @Param('id') tagId: string) {
-        const user = this.jwtUtil.decode(auth);
-        return this.tagsService.getTagById(user?.uid, tagId);
+    @UseGuards(JwtAuthGuard)
+    @Get('/:id')
+    getOne(@Req() request: any, @Param('id') tagId: string) {
+        return this.tagsService.getTagById(request?.user?.uid, tagId);
+    }
+
+    @ApiOperation({ summary: 'Создание тэга' })
+    @UseGuards(JwtAuthGuard)
+    @ApiResponse({ status: 200 })
+    @Post('/')
+    create(@Req() request: any, @Body() tagDto: TagDto) {
+        return this.tagsService.createTag(request?.user?.uid, tagDto);
     }
 
     @ApiOperation({ summary: 'Получение списка тэгов' })
     @ApiResponse({ status: 200 })
-    @Get('/tag')
-    getMany(@Headers('authorization') auth: string, @Query() queryParams: GetTagsQueryParamsDto) {
-        const user = this.jwtUtil.decode(auth);
-        return this.tagsService.getTagsByUser(user?.uid, queryParams);
+    @UseGuards(JwtAuthGuard)
+    @Get('/')
+    getMany(@Req() request: any, @Query() queryParams: GetTagsQueryParamsDto) {
+        return this.tagsService.getTagsByUser(request?.user?.uid, queryParams);
     }
 
     @ApiOperation({ summary: 'Обновление тэгa' })
     @ApiResponse({ status: 200 })
-    @Put('/tag:id')
-    update(@Headers('authorization') auth: string, @Body() tagDto: TagDto, @Param('id') tagId: string) {
-        const user = this.jwtUtil.decode(auth);
-        return this.tagsService.updateTag(user?.uid, tagDto, tagId);
+    @UseGuards(JwtAuthGuard)
+    @Put('/:id')
+    update(@Req() request: any, @Body() tagDto: TagDto, @Param('id') tagId: string) {
+        return this.tagsService.updateTag(request?.user?.uid, tagDto, tagId);
     }
 
     @ApiOperation({ summary: 'Удаление тэгa' })
     @ApiResponse({ status: 200 })
-    @Delete('/tag:id')
-    delete(@Headers('authorization') auth: string, @Param('id') tagId: string) {
-        const user = this.jwtUtil.decode(auth);
-        return this.tagsService.deleteTag(user?.uid, tagId);
+    @UseGuards(JwtAuthGuard)
+    @Delete('/:id')
+    delete(@Req() request: any, @Param('id') tagId: string) {
+        return this.tagsService.deleteTag(request?.user?.uid, tagId);
     }
 }

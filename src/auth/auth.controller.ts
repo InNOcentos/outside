@@ -5,9 +5,9 @@ import { LoginUserDto } from 'src/users/dto/login-user.dto';
 import { AuthService } from './auth.service';
 
 @ApiTags('Авторизация')
-@Controller('auth')
+@Controller('/')
 export class AuthController {
-    constructor (private authService: AuthService) {}
+    constructor (private authService: AuthService) { }
 
     @ApiOperation({ summary: 'Авторизация' })
     @ApiResponse({ status: 200 })
@@ -17,6 +17,7 @@ export class AuthController {
     }
 
     @ApiOperation({ summary: 'Регистрация' })
+    @ApiResponse({ status: 200 })
     @Post('/signin')
     signin(@Body() createUserDto: CreateUserDto) {
         return this.authService.signin(createUserDto);

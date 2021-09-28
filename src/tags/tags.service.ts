@@ -5,7 +5,7 @@ import { GetTagsQueryParamsDto } from './dto/get-tags-query-params.dto';
 
 @Injectable()
 export class TagsService {
-    constructor(@Inject(PG_CONNECTION) private readonly pool: any) {}
+    constructor (@Inject(PG_CONNECTION) private readonly pool: any) { }
 
     async createTag(id: string, postTagDto: TagDto) {
         const { name, sortOrder } = postTagDto;
@@ -20,10 +20,15 @@ export class TagsService {
         }
         sql += ' RETURNING id';
 
+        console.log(sql)
+        console.log(params)
+
         return (await this.pool.query(sql, params))?.rows[0];
     }
 
     async getTagById(userId: string, tagId: string) {
+        console.log(userId)
+        console.log(tagId)
         let sql = `SELECT ou.nickname, ou.uid, ot.name, ot.sortOrder FROM outside.tag ot
         INNER JOIN outside.user ou ON ou.uid = ot.creator WHERE ou.uid = $1 AND ot.id = $2`;
         const tag = (await this.pool.query(sql, [userId, tagId]))?.rows[0];
@@ -52,7 +57,7 @@ export class TagsService {
             sql += ' name';
             addSqlParam(name, idx, params);
         }
-        if (sortOrder)  {
+        if (sortOrder) {
             if (name) sql += ', ';
             sql += ' sortName';
             addSqlParam(sortOrder, idx, params);
@@ -86,13 +91,13 @@ export class TagsService {
         return (await this.pool.query('DELETE FROM outside.tag ot WHERE creator = $1 AND ot.id = $2', [userId, tagId]));
     }
 
-    async getTagsByUser(id: string, queryParams: GetTagsQueryParamsDto) {
+    async getTagsByUser(userId: string, queryParams: GetTagsQueryParamsDto) {
         const { sortByOrder, sortByName, offset, length } = queryParams;
         let sql = `SELECT (ou.nickname, ou.uid, ot.sortOrder, ot.name) AS data, count(ot.id) FROM outside.tag ot
-        INNER JOIN outside.user ou ON ou.uid = ot.creator ORDER BY `;
+        INNER JOIN outside.user ou ON ou.uid = ot.creator WHERE ou.uid = $1 ORDER BY `;
 
-        let idx = 1;
-        let params: string[] = [];
+        let idx = 2;
+        let params: string[id] = [];
 
         if (sortByName) {
             if (+sortByName) {
@@ -112,9 +117,8 @@ export class TagsService {
             addSqlParam(length, idx, params);
         }
 
-        sql +=  ` WHERE ou.uid = $${idx}`;
         const tag = (await this.pool.query(sql, params))?.rows;
-        if (!tag)return;
+        if (!tag) return;
 
         const { data, count } = tag;
 
@@ -122,7 +126,7 @@ export class TagsService {
         const quantity = (await this.pool.query('SELECT COUNT(ot.id) FROM outside.tag ot WHERE creator = $1', [id]))?.rows[0];
 
         return {
-            data: data.map(e=> {
+            data: data.map(e => {
                 const { nickname, uid, name, sortOrder } = e;
                 return {
                     creator: {

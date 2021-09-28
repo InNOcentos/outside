@@ -5,14 +5,15 @@ import { LoginUserDto } from 'src/users/dto/login-user.dto';
 import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcryptjs';
 import { User } from './interface';
+import { JWTUtil } from './jwt-utils';
 
 @Injectable()
 export class AuthService {
-    constructor(private userService: UsersService, private jwtService: JwtService) {}
+    constructor (private userService: UsersService, private jwtService: JwtService, private jwtUtil: JWTUtil) { }
 
     async login(loginUserDto: LoginUserDto) {
         const user = await this.validateUser(loginUserDto);
-        return this.generateToken(user);
+        return this.generateTokens(user);
     }
 
     async signin(createUserDto: CreateUserDto) {
@@ -22,16 +23,16 @@ export class AuthService {
         const hashPassword = await bcrypt.hash(String(createUserDto.password), 5);
         const user = await this.userService.createUser({ ...createUserDto, password: hashPassword });
 
-        return this.generateToken(user);
+        return this.generateTokens(user);
     }
 
-    private async generateToken(user: User) {
-        const payload = { email: user.email, nickname: user.nickname, uid: user.uid };
+    private async generateTokens(user: User) {
+        const accessToken = this.jwtService.sign(user, this.jwtUtil.getAccessTokenConfig())
+        const refreshToken = this.jwtService.sign(user, this.jwtUtil.getRefreshTokenConfig())
 
         return {
-            token: this.jwtService.sign(payload),
-            //TODO: fix
-            expire: '1800'
+            accessToken,
+            refreshToken
         };
     }
 
