@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { TagDto } from './dto/post-tag.dto';
-import { PG_CONNECTION } from 'src/constants';
+import { HttpErrorValues, PG_CONNECTION } from 'src/constants';
 import { GetTagsQueryParamsDto } from './dto/get-tags-query-params.dto';
 import { addSqlParam } from 'src/utils';
 
@@ -25,7 +25,7 @@ export class TagsService {
             return (await this.pool.query(sql, params))?.rows[0];
         } catch (e) {
             console.log(e);
-            throw new HttpException('Ошибка при создании тега, вероятно, тэг с таким названием уже существует', HttpStatus.CONFLICT);
+            throw new HttpException(HttpErrorValues.unknown, e?.status || HttpStatus.CONFLICT);
         }
     }
 
@@ -48,7 +48,7 @@ export class TagsService {
             };
         } catch (e) {
             console.log(e);
-            throw new HttpException('Не удалось найти данный тег', HttpStatus.NOT_FOUND);
+            throw new HttpException(HttpErrorValues.unknown, e?.status || HttpStatus.NOT_FOUND);
         }
     }
 
@@ -58,7 +58,7 @@ export class TagsService {
 
             const storedCreatorId = (await this.pool.query('SELECT creator FROM outside.tag WHERE id = $1', [tagId]))?.rows[0]?.creator;
 
-            if (storedCreatorId !==  userId) throw new HttpException('Вы не имеете доступа для данной операции', HttpStatus.UNAUTHORIZED);
+            if (storedCreatorId !==  userId) throw new HttpException(HttpErrorValues.no_access, HttpStatus.UNAUTHORIZED);
 
             let idx = 1;
             let params: string[] = [];
@@ -90,13 +90,18 @@ export class TagsService {
             };
         } catch (e) {
             console.log(e);
-            throw new HttpException('Не удалось найти данный тег', HttpStatus.NOT_FOUND);
+            throw new HttpException(HttpErrorValues.unknown, e?.status || HttpStatus.NOT_FOUND);
         }
     }
 
     async deleteTag(userId: string, tagId: string) {
-        //TODO: cascade
-        return (await this.pool.query('DELETE FROM outside.tag ot WHERE creator = $1 AND ot.id = $2 RETURNING id', [userId, tagId]))?.rows[0];
+        try {
+            //TODO: cascade
+            return (await this.pool.query('DELETE FROM outside.tag ot WHERE creator = $1 AND ot.id = $2 RETURNING id', [userId, tagId]))?.rows[0];
+        } catch (e) {
+            console.log(e);
+            throw new HttpException(HttpErrorValues.unknown, e?.status || HttpStatus.NOT_FOUND);
+        }
     }
 
     async getTagsByUser(userId: string, queryParams: GetTagsQueryParamsDto) {
@@ -151,7 +156,7 @@ export class TagsService {
             };
         }catch(e) {
             console.log(e);
-            throw new HttpException('Не удалось найти получить теги', HttpStatus.NOT_FOUND);
+            throw new HttpException(HttpErrorValues.unknown, e?.status || HttpStatus.NOT_FOUND);
         }
     }
 }

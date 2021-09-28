@@ -3,11 +3,13 @@ import { PG_CONNECTION } from 'src/constants';
 import { CreateUserDto } from './dto/create-user.dto';
 import { addSqlParam } from 'src/utils';
 import { hashPassword } from 'src/utils';
+import { HttpErrorValues } from 'src/constants';
 
 @Injectable()
 export class UsersService {
     constructor (@Inject(PG_CONNECTION) private readonly pool: any) { }
 
+    //TODO: дубликация ника
     async createUser(createUserDto: CreateUserDto) {
         try {
             const { email, password, nickname } = createUserDto;
@@ -16,7 +18,7 @@ export class UsersService {
             return user;
         } catch (e) {
             console.log(e);
-            throw new HttpException('Не удалось создать пользователя', HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(HttpErrorValues.unknown, e?.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -27,7 +29,7 @@ export class UsersService {
             return user;
         } catch (e) {
             console.log(e);
-            throw new HttpException('Не удалось получить пользователя', HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(HttpErrorValues.unknown, e?.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -42,7 +44,7 @@ export class UsersService {
             };
         } catch (e) {
             console.log(e);
-            throw new HttpException('Не удалось получить пользователя', HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(HttpErrorValues.unknown, e?.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -51,7 +53,7 @@ export class UsersService {
             return (await this.pool.query('DELETE FROM outside.user WHERE uid = $1 RETURNING uid', [id]))?.rows[0];
         } catch (e) {
             console.log(e);
-            throw new HttpException('Не удалось удалить пользователя', HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(HttpErrorValues.unknown, e?.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -61,7 +63,7 @@ export class UsersService {
 
             const getMatches = (await this.pool.query('SELECT uid FROM outside.user WHERE (email = $1 OR nickname = $2) AND uid != $3', [email, nickname, userId]))?.rowCount;
             if (getMatches) {
-                throw new HttpException('Пользователь с такими данными уже существует', HttpStatus.CONFLICT);
+                throw new HttpException(HttpErrorValues.user_already_exists, HttpStatus.CONFLICT);
             }
 
             password = await hashPassword(password);
@@ -93,7 +95,7 @@ export class UsersService {
             return { email: user?.email, nickname: user?.nickname };
         }catch (e) {
             console.log(e);
-            throw new HttpException('Не удалось удалить пользователя', HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(HttpErrorValues.unknown, e?.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

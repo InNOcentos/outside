@@ -7,6 +7,7 @@ import * as bcrypt from 'bcryptjs';
 import { User } from './interface';
 import { JWTUtil } from './jwt-utils';
 import { hashPassword } from 'src/utils';
+import { HttpErrorValues } from 'src/constants';
 
 @Injectable()
 export class AuthService {
@@ -18,14 +19,14 @@ export class AuthService {
             return this.generateTokens(user);
         } catch (e) {
             console.log(e);
-            throw new HttpException('Неизвестная ошибка', HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(HttpErrorValues[e.message as HttpErrorValues] || HttpErrorValues.unknown, e?.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     async signin(createUserDto: CreateUserDto) {
         try {
             const userExistance = await this.userService.getUserByEmail(createUserDto?.email);
-            if (userExistance) throw new HttpException('Пользователь с таким email уже существует', HttpStatus.BAD_REQUEST);
+            if (userExistance) throw new HttpException(HttpErrorValues.user_already_exists, HttpStatus.BAD_REQUEST);
 
             const hash = await hashPassword(createUserDto?.password);
             const user = await this.userService.createUser({ ...createUserDto, password: hash });
@@ -33,21 +34,20 @@ export class AuthService {
             return this.generateTokens(user);
         } catch (e) {
             console.log(e);
-            throw new HttpException('Неизвестная ошибка', HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(HttpErrorValues[e.message as HttpErrorValues] || HttpErrorValues.unknown, e?.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     async refresh(body: any) {
         try {
             const { token } = body;
-            if (!token) throw new HttpException('Неизвестная ошибка', HttpStatus.INTERNAL_SERVER_ERROR);
 
             const { uid } = this.jwtService.verify(token);
             const user = await this.userService.getUserById(uid);
             return this.generateTokens(user);
         } catch (e) {
             console.log(e);
-            throw new HttpException('Вы не имеете доступа для данной операции', HttpStatus.UNAUTHORIZED);
+            throw new HttpException(HttpErrorValues[e.message as HttpErrorValues] || HttpErrorValues.unknown, e?.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -63,9 +63,9 @@ export class AuthService {
 
     private async validateUser(userDto: LoginUserDto): Promise<User> {
         const user: User = await this.userService.getUserByEmail(userDto?.email);
-        if (!user) throw new HttpException('Некорректный email или пароль', HttpStatus.UNAUTHORIZED);
+        if (!user) throw new HttpException(HttpErrorValues.invalid_email_or_password, HttpStatus.UNAUTHORIZED);
         const passwordEquals = await bcrypt.compare(userDto.password, user.password);
-        if (!(passwordEquals && user)) throw new UnauthorizedException('Некорректный email или пароль');
+        if (!(passwordEquals && user)) throw new UnauthorizedException(HttpErrorValues.invalid_email_or_password);
 
         return user;
     }

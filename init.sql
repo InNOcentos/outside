@@ -10,3 +10,5 @@ CREATE TABLE outside.user (
     ) WITH (OIDS=FALSE);
 
 CREATE TABLE outside.tag (id SERIAL, creator uuid, name  varchar(40), sortOrder int DEFAULT 0, UNIQUE(name));
+
+CREATE TABLE outside.user_tag (uid UUID, tags jsonb);
