@@ -2,8 +2,6 @@
 
 DIR=`dirname $0`
 
-CMD="docker exec -it ph_container -U $PG_USER $PG_DB"
-
-
 echo "Делаем миграции..."
-bash $DIR/
+
+bash $DIR/migration_2021_09_28.sh $1 $2

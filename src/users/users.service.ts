@@ -9,16 +9,18 @@ import { HttpErrorValues } from 'src/constants';
 export class UsersService {
     constructor (@Inject(PG_CONNECTION) private readonly pool: any) { }
 
-    //TODO: дубликация ника
     async createUser(createUserDto: CreateUserDto) {
         try {
             const { email, password, nickname } = createUserDto;
+            if (!email || !password || !nickname) throw new HttpException(HttpErrorValues.param, HttpStatus.BAD_REQUEST);
+            let emailAndNicknameExistance = (await this.pool.query('SELECT uid FROM outside.user WHERE email = $1 OR nickname = $2', [email, nickname]))?.rowsCount;
+            if (emailAndNicknameExistance)  throw new HttpException(HttpErrorValues.user_already_exists, HttpStatus.CONFLICT);
             let sql = 'INSERT INTO outside.user (email, password, nickname) VALUES ($1, $2, $3) RETURNING email, nickname, uid';
             const user = (await this.pool.query(sql, [email, password, nickname]))?.rows[0];
             return user;
         } catch (e) {
             console.log(e);
-            throw new HttpException(HttpErrorValues.unknown, e?.status || HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException( HttpErrorValues[e?.message] || HttpErrorValues.unknown, e?.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -29,7 +31,7 @@ export class UsersService {
             return user;
         } catch (e) {
             console.log(e);
-            throw new HttpException(HttpErrorValues.unknown, e?.status || HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException( HttpErrorValues[e?.message] || HttpErrorValues.unknown, e?.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -44,7 +46,7 @@ export class UsersService {
             };
         } catch (e) {
             console.log(e);
-            throw new HttpException(HttpErrorValues.unknown, e?.status || HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(HttpErrorValues[e.message as HttpErrorValues] || HttpErrorValues.unknown, e?.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -53,7 +55,7 @@ export class UsersService {
             return (await this.pool.query('DELETE FROM outside.user WHERE uid = $1 RETURNING uid', [id]))?.rows[0];
         } catch (e) {
             console.log(e);
-            throw new HttpException(HttpErrorValues.unknown, e?.status || HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException( HttpErrorValues[e?.message] || HttpErrorValues.unknown, e?.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -61,7 +63,7 @@ export class UsersService {
         try  {
             let { email, nickname, password } = newUserData;
 
-            const getMatches = (await this.pool.query('SELECT uid FROM outside.user WHERE (email = $1 OR nickname = $2) AND uid != $3', [email, nickname, userId]))?.rowCount;
+            const getMatches = (await this.pool.query('SELECT uid FROM outside.user WHERE email = $1 OR nickname = $2 AND uid != $3', [email, nickname, userId]))?.rows.length;
             if (getMatches) {
                 throw new HttpException(HttpErrorValues.user_already_exists, HttpStatus.CONFLICT);
             }
@@ -95,7 +97,7 @@ export class UsersService {
             return { email: user?.email, nickname: user?.nickname };
         }catch (e) {
             console.log(e);
-            throw new HttpException(HttpErrorValues.unknown, e?.status || HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException( HttpErrorValues[e?.message] || HttpErrorValues.unknown, e?.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

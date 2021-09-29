@@ -8,6 +8,7 @@ import { User } from './interface';
 import { JWTUtil } from './jwt-utils';
 import { hashPassword } from 'src/utils';
 import { HttpErrorValues } from 'src/constants';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 
 @Injectable()
 export class AuthService {
@@ -19,16 +20,18 @@ export class AuthService {
             return this.generateTokens(user);
         } catch (e) {
             console.log(e);
-            throw new HttpException(HttpErrorValues[e.message as HttpErrorValues] || HttpErrorValues.unknown, e?.status || HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException( HttpErrorValues[e?.message] || HttpErrorValues.unknown, e?.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     async signin(createUserDto: CreateUserDto) {
         try {
-            const userExistance = await this.userService.getUserByEmail(createUserDto?.email);
+            const { email, password } = createUserDto;
+            if (!this.validatePassword(password)) throw new HttpException(HttpErrorValues.invalid_password, HttpStatus.BAD_REQUEST);
+            const userExistance = await this.userService.getUserByEmail(email);
             if (userExistance) throw new HttpException(HttpErrorValues.user_already_exists, HttpStatus.BAD_REQUEST);
 
-            const hash = await hashPassword(createUserDto?.password);
+            const hash = await hashPassword(password);
             const user = await this.userService.createUser({ ...createUserDto, password: hash });
 
             return this.generateTokens(user);
@@ -38,7 +41,7 @@ export class AuthService {
         }
     }
 
-    async refresh(body: any) {
+    async refresh(body: RefreshTokenDto) {
         try {
             const { token } = body;
 
@@ -68,5 +71,11 @@ export class AuthService {
         if (!(passwordEquals && user)) throw new UnauthorizedException(HttpErrorValues.invalid_email_or_password);
 
         return user;
+    }
+
+    private validatePassword(password: string) {
+        const hasUpperCaseLoweCaseAndNumber = password.match(/^(?:(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).*)$/);
+        const isValidLength = password.match(/^\w{5,}$/);
+        return (hasUpperCaseLoweCaseAndNumber && isValidLength);
     }
 }

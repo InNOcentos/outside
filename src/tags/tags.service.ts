@@ -11,6 +11,7 @@ export class TagsService {
     async createTag(userId: string, postTagDto: TagDto) {
         try{
             const { name, sortOrder } = postTagDto;
+            if (!name) throw new HttpException(HttpErrorValues.param, HttpStatus.BAD_REQUEST);
             let sql = 'INSERT INTO outside.tag (creator, name ';
             const params: string[] = [userId, name];
 
@@ -25,7 +26,7 @@ export class TagsService {
             return (await this.pool.query(sql, params))?.rows[0];
         } catch (e) {
             console.log(e);
-            throw new HttpException(HttpErrorValues.unknown, e?.status || HttpStatus.CONFLICT);
+            throw new HttpException( HttpErrorValues[e?.message] || HttpErrorValues.unknown, e?.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -48,7 +49,7 @@ export class TagsService {
             };
         } catch (e) {
             console.log(e);
-            throw new HttpException(HttpErrorValues.unknown, e?.status || HttpStatus.NOT_FOUND);
+            throw new HttpException( HttpErrorValues[e?.message] || HttpErrorValues.unknown, e?.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -90,17 +91,16 @@ export class TagsService {
             };
         } catch (e) {
             console.log(e);
-            throw new HttpException(HttpErrorValues.unknown, e?.status || HttpStatus.NOT_FOUND);
+            throw new HttpException( HttpErrorValues[e?.message] || HttpErrorValues.unknown, e?.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     async deleteTag(userId: string, tagId: string) {
         try {
-            //TODO: cascade
             return (await this.pool.query('DELETE FROM outside.tag ot WHERE creator = $1 AND ot.id = $2 RETURNING id', [userId, tagId]))?.rows[0];
         } catch (e) {
             console.log(e);
-            throw new HttpException(HttpErrorValues.unknown, e?.status || HttpStatus.NOT_FOUND);
+            throw new HttpException( HttpErrorValues[e?.message] || HttpErrorValues.unknown, e?.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -113,14 +113,11 @@ export class TagsService {
             let idx = 2;
             let params: string[] = [userId];
 
-            if (sortByName) {
-                if (+sortByName) {
-                    sql += ' ot.name';
-                } else sql += ' ot.creator';
-            } else sql += ' ot.name';
-            if (sortByOrder && Boolean(+sortByOrder)) {
-                sql += ' ASC';
-            } else sql += ' DESC';
+            if (sortByName == '0') sql += ' ot.name';
+            else sql += 'ot.creator';
+
+            if (sortByOrder == '') sql += ' DESC';
+            else sql += ' ASC';
 
             if (offset) {
                 sql += ` OFFSET $${idx}`;
@@ -149,14 +146,14 @@ export class TagsService {
                     };
                 }),
                 meta: {
-                    offset,
-                    length,
+                    offset: offset || 0,
+                    length: length || 0,
                     quantity: quantity?.count
                 }
             };
         }catch(e) {
             console.log(e);
-            throw new HttpException(HttpErrorValues.unknown, e?.status || HttpStatus.NOT_FOUND);
+            throw new HttpException( HttpErrorValues[e?.message] || HttpErrorValues.unknown, e?.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

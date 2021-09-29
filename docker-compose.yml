@@ -35,4 +35,8 @@ services:
       - PG_USER=${PG_USER}
       - PG_DB=${PG_DB}
       - PG_PASSWORD=${PG_PASSWORD}
-networks: ['webnet']
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_ACCESS_TOKEN_LIFETIME=${JWT_ACCESS_TOKEN_LIFETIME}
+      - JWT_REFRESH_TOKEN_LIFETIME=${JWT_REFRESH_TOKEN_LIFETIME}
+networks:
+  webnet:

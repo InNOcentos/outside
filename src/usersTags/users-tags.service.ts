@@ -8,27 +8,26 @@ export class UsersTagsService {
 
     async createTagsByIds(userId: string, userTagsIdsDto: UserTagsIdsDto) {
         const { tags } = userTagsIdsDto;
+        if (!tags.length) throw new HttpException(HttpErrorValues.param, HttpStatus.BAD_REQUEST);
+        const client = await this.pool.connect();
         try {
-            const client = await this.pool.connect();
-
             await client.query('BEGIN TRANSACTION');
 
-            const params:  any[] = [];
+            const newTags: any[] = [];
+            for (let tag of tags) {
+                let newTag = ((await client.query(`INSERT INTO outside.tag (creator, name, sortorder) SELECT creator, name, sortorder
+                FROM outside.tag WHERE creator = $1 AND id = $2 RETURNING id, name, sortorder`, [userId, tag]))?.rows[0]);
+                if (!newTag) throw new HttpException(HttpErrorValues.not_found, HttpStatus.BAD_REQUEST);
+                newTags.push(newTag);
+            }
 
-            const sql = tags.reduce((acc:string, tag: number, idx: number, arr: number[])=> {
-                params.push(tag);
-                acc += (`$${idx + 2}`);
-                if (idx != arr.length - 1) acc +=', ';
-                return acc;
-            }, 'SELECT * FROM outside.tag WHERE creator = $1 AND id IN ( ');
+            await client.query('COMMIT TRANSACTION');
 
-            console.log(sql);
-            console.log(params);
-
-
+            return newTags;
         } catch (e) {
             console.log(e);
-            throw new HttpException(HttpErrorValues.unknown, e?.status || HttpStatus.INTERNAL_SERVER_ERROR);
+            client.release();
+            throw new HttpException( HttpErrorValues[e?.message] || HttpErrorValues.unknown, e?.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }
