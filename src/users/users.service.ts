@@ -13,6 +13,8 @@ export class UsersService {
     async createUser(createUserDto: CreateUserDto) {
         try {
             const { email, password, nickname } = createUserDto;
+            let emailAndNicknameExistance = (await this.pool.query('SELECT uid FROM outside.user WHERE email = $1 OR nickname = $2', [email, nickname]))?.rowsCount;
+            if (emailAndNicknameExistance)  throw new HttpException(HttpErrorValues.user_already_exists, HttpStatus.CONFLICT);
             let sql = 'INSERT INTO outside.user (email, password, nickname) VALUES ($1, $2, $3) RETURNING email, nickname, uid';
             const user = (await this.pool.query(sql, [email, password, nickname]))?.rows[0];
             return user;

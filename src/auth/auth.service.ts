@@ -25,7 +25,7 @@ export class AuthService {
 
     async signin(createUserDto: CreateUserDto) {
         try {
-            if (!this.validatePassword(createUserDto?.password)) throw new HttpException(HttpErrorValues.invalid_password, HttpStatus.BAD_REQUEST)
+            if (!this.validatePassword(createUserDto?.password)) throw new HttpException(HttpErrorValues.invalid_password, HttpStatus.BAD_REQUEST);
             const userExistance = await this.userService.getUserByEmail(createUserDto?.email);
             if (userExistance) throw new HttpException(HttpErrorValues.user_already_exists, HttpStatus.BAD_REQUEST);
 
@@ -72,8 +72,8 @@ export class AuthService {
     }
 
     private validatePassword(password: string) {
-        const hasUpperCaseLoweCaseAndNumber = password.match(/^(?:(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).*)$/)
-        const isValidLength = password.match(/^\w{5,}$/)
-        return (hasUpperCaseLoweCaseAndNumber && isValidLength)
+        const hasUpperCaseLoweCaseAndNumber = password.match(/^(?:(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).*)$/);
+        const isValidLength = password.match(/^\w{5,}$/);
+        return (hasUpperCaseLoweCaseAndNumber && isValidLength);
     }
 }
