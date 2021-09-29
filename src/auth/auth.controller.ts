@@ -3,6 +3,7 @@ import { ApiOperation, ApiProperty, ApiResponse, ApiTags } from '@nestjs/swagger
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { LoginUserDto } from 'src/users/dto/login-user.dto';
 import { AuthService } from './auth.service';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 
 @ApiTags('Авторизация')
 @Controller('/')
@@ -26,7 +27,7 @@ export class AuthController {
     @ApiOperation({ summary: 'Обновление токена' })
     @ApiResponse({ status: 200 })
     @Post('/refresh')
-    refresh(@Body() body: any) {
-        return this.authService.refresh(body);
+    refresh(@Body() refreshToken: RefreshTokenDto) {
+        return this.authService.refresh(refreshToken);
     }
 }

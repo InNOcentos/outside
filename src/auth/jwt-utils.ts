@@ -18,14 +18,14 @@ export class JWTUtil {
 
     getAccessTokenConfig() {
         return {
-            secret: '123',
+            secret: process.env.JWT_SECRET,
             expiresIn: JWT_ACCESS_TOKEN_LIFETIME
         };
     }
 
     getRefreshTokenConfig() {
         return {
-            secret: '123',
+            secret: process.env.JWT_SECRET,
             expiresIn: JWT_REFRESH_TOKEN_LIFETIME
         };
     }

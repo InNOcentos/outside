@@ -96,7 +96,6 @@ export class TagsService {
 
     async deleteTag(userId: string, tagId: string) {
         try {
-            //TODO: cascade
             return (await this.pool.query('DELETE FROM outside.tag ot WHERE creator = $1 AND ot.id = $2 RETURNING id', [userId, tagId]))?.rows[0];
         } catch (e) {
             console.log(e);
@@ -146,8 +145,8 @@ export class TagsService {
                     };
                 }),
                 meta: {
-                    offset,
-                    length,
+                    offset: offset || 0,
+                    length: length || 0,
                     quantity: quantity?.count
                 }
             };

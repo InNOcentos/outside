@@ -8,6 +8,7 @@ import { User } from './interface';
 import { JWTUtil } from './jwt-utils';
 import { hashPassword } from 'src/utils';
 import { HttpErrorValues } from 'src/constants';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 
 @Injectable()
 export class AuthService {
@@ -39,7 +40,7 @@ export class AuthService {
         }
     }
 
-    async refresh(body: any) {
+    async refresh(body: RefreshTokenDto) {
         try {
             const { token } = body;
 

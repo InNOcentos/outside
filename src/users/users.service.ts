@@ -9,7 +9,6 @@ import { HttpErrorValues } from 'src/constants';
 export class UsersService {
     constructor (@Inject(PG_CONNECTION) private readonly pool: any) { }
 
-    //TODO: дубликация ника
     async createUser(createUserDto: CreateUserDto) {
         try {
             const { email, password, nickname } = createUserDto;
