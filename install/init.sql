@@ -9,6 +9,3 @@ CREATE TABLE outside.user (
     CONSTRAINT  pkey_tbl PRIMARY KEY (uid)
     ) WITH (OIDS=FALSE);
 
-CREATE TABLE outside.tag (id SERIAL, creator uuid, name  varchar(40), sortOrder int DEFAULT 0, UNIQUE(name));
-
-CREATE TABLE outside.user_tag (uid UUID, tags jsonb);
