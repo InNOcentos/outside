@@ -11,6 +11,7 @@ export class UsersTagsController {
 
     @ApiOperation({ summary: 'Создание тега по его id' })
     @Post('/')
+    @ApiResponse({ status: 201 })
     @UseGuards(JwtAuthGuard)
     create(@Req() request: any, @Body() userTagsIdsDto: UserTagsIdsDto) {
         return this.usersTagsService.createTagsByIds(request?.user?.uid, userTagsIdsDto);

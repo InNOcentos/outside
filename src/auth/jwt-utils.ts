@@ -2,8 +2,7 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import {
-    JWT_ACCESS_TOKEN_SECRET,
-    JWT_REFRESH_TOKEN_SECRET,
+    JWT_TOKEN_SECRET,
     JWT_ACCESS_TOKEN_LIFETIME,
     JWT_REFRESH_TOKEN_LIFETIME
 } from './constants';
@@ -18,14 +17,14 @@ export class JWTUtil {
 
     getAccessTokenConfig() {
         return {
-            secret: process.env.JWT_SECRET,
+            secret: JWT_TOKEN_SECRET,
             expiresIn: JWT_ACCESS_TOKEN_LIFETIME
         };
     }
 
     getRefreshTokenConfig() {
         return {
-            secret: process.env.JWT_SECRET,
+            secret: JWT_TOKEN_SECRET,
             expiresIn: JWT_REFRESH_TOKEN_LIFETIME
         };
     }

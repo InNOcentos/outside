@@ -62,7 +62,7 @@ export class UsersService {
         try  {
             let { email, nickname, password } = newUserData;
 
-            const getMatches = (await this.pool.query('SELECT uid FROM outside.user WHERE (email = $1 OR nickname = $2) AND uid != $3', [email, nickname, userId]))?.rowCount;
+            const getMatches = (await this.pool.query('SELECT uid FROM outside.user WHERE email = $1 OR nickname = $2 AND uid != $3', [email, nickname, userId]))?.rows.length;
             if (getMatches) {
                 throw new HttpException(HttpErrorValues.user_already_exists, HttpStatus.CONFLICT);
             }

@@ -21,7 +21,7 @@ export class TagsControllers {
 
     @ApiOperation({ summary: 'Создание тэга' })
     @UseGuards(JwtAuthGuard)
-    @ApiResponse({ status: 200 })
+    @ApiResponse({ status: 201 })
     @Post('/')
     create(@Req() request: any, @Body() tagDto: TagDto) {
         return this.tagsService.createTag(request?.user?.uid, tagDto);

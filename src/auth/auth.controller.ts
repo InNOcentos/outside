@@ -18,14 +18,14 @@ export class AuthController {
     }
 
     @ApiOperation({ summary: 'Регистрация' })
-    @ApiResponse({ status: 200 })
+    @ApiResponse({ status: 201 })
     @Post('/signin')
     signin(@Body() createUserDto: CreateUserDto) {
         return this.authService.signin(createUserDto);
     }
 
     @ApiOperation({ summary: 'Обновление токена' })
-    @ApiResponse({ status: 200 })
+    @ApiResponse({ status: 201 })
     @Post('/refresh')
     refresh(@Body() refreshToken: RefreshTokenDto) {
         return this.authService.refresh(refreshToken);

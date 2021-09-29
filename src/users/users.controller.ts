@@ -11,6 +11,7 @@ export class UsersController {
 
     @ApiOperation({ summary: 'Получение пользователя' })
     @Get('/')
+    @ApiResponse({ status: 200 })
     @UseGuards(JwtAuthGuard)
     getUser(@Req() request: any) {
         return this.usersService.getUserById(request?.user?.uid);
@@ -18,6 +19,7 @@ export class UsersController {
 
     @ApiOperation({ summary: 'Обновление пользователя' })
     @Put('/')
+    @ApiResponse({ status: 200 })
     @UseGuards(JwtAuthGuard)
     updateUser(@Req() request: any, @Body() newUserData: CreateUserDto) {
         return this.usersService.updateUserById(request?.user?.uid, newUserData);
@@ -25,6 +27,7 @@ export class UsersController {
 
     @ApiOperation({ summary: 'Удаление пользователя' })
     @Delete('/')
+    @ApiResponse({ status: 200 })
     @UseGuards(JwtAuthGuard)
     deleteUser(@Req() request: any) {
         console.log(request.user);
