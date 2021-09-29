@@ -35,4 +35,5 @@ services:
       - PG_USER=${PG_USER}
       - PG_DB=${PG_DB}
       - PG_PASSWORD=${PG_PASSWORD}
-networks: ['webnet']
+networks:
+  webnet:

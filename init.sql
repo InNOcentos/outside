@@ -6,6 +6,7 @@ CREATE TABLE outside.user (
     uid UUID NOT NULL DEFAULT uuid_generate_v1(),
     email varchar(100), password varchar(100),
     nickname varchar(30),
+    UNIQUE(email)
     CONSTRAINT  pkey_tbl PRIMARY KEY (uid)
     ) WITH (OIDS=FALSE);
 

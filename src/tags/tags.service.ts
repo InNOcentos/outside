@@ -113,14 +113,11 @@ export class TagsService {
             let idx = 2;
             let params: string[] = [userId];
 
-            if (sortByName) {
-                if (+sortByName) {
-                    sql += ' ot.name';
-                } else sql += ' ot.creator';
-            } else sql += ' ot.name';
-            if (sortByOrder && Boolean(+sortByOrder)) {
-                sql += ' ASC';
-            } else sql += ' DESC';
+            if (sortByName == '0') sql += ' ot.name'
+            else sql += 'ot.creator'
+
+            if (sortByOrder == '') sql += ' DESC'
+            else sql += ' ASC'
 
             if (offset) {
                 sql += ` OFFSET $${idx}`;
