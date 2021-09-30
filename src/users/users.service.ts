@@ -46,7 +46,7 @@ export class UsersService {
             };
         } catch (e) {
             console.log(e);
-            throw new HttpException(HttpErrorValues.unknown, e?.status || HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(HttpErrorValues[e.message as HttpErrorValues] || HttpErrorValues.unknown, e?.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
