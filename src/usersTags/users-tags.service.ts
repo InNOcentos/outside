@@ -8,6 +8,7 @@ export class UsersTagsService {
 
     async createTagsByIds(userId: string, userTagsIdsDto: UserTagsIdsDto) {
         const { tags } = userTagsIdsDto;
+        if (!tags.length) throw new HttpException(HttpErrorValues.param, HttpStatus.BAD_REQUEST);
         const client = await this.pool.connect();
         try {
             await client.query('BEGIN TRANSACTION');
@@ -15,9 +16,9 @@ export class UsersTagsService {
             const newTags: any[] = [];
             for (let tag of tags) {
                 let newTag = ((await client.query(`INSERT INTO outside.tag (creator, name, sortorder) SELECT creator, name, sortorder
-                FROM outside.tag WHERE creator = $1 AND id = $2 RETURNING id`, [userId, tag]))?.rows[0]);
+                FROM outside.tag WHERE creator = $1 AND id = $2 RETURNING id, name, sortorder`, [userId, tag]))?.rows[0]);
                 if (!newTag) throw new HttpException(HttpErrorValues.not_found, HttpStatus.BAD_REQUEST);
-                newTag.push(newTag);
+                newTags.push(newTag);
             }
 
             await client.query('COMMIT TRANSACTION');
@@ -26,7 +27,7 @@ export class UsersTagsService {
         } catch (e) {
             console.log(e);
             client.release();
-            throw new HttpException(HttpErrorValues.unknown, e?.status || HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException( HttpErrorValues[e?.message] || HttpErrorValues.unknown, e?.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

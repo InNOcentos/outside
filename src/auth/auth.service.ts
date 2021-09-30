@@ -20,17 +20,18 @@ export class AuthService {
             return this.generateTokens(user);
         } catch (e) {
             console.log(e);
-            throw new HttpException(HttpErrorValues[e.message as HttpErrorValues] || HttpErrorValues.unknown, e?.status || HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException( HttpErrorValues[e?.message] || HttpErrorValues.unknown, e?.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     async signin(createUserDto: CreateUserDto) {
         try {
-            if (!this.validatePassword(createUserDto?.password)) throw new HttpException(HttpErrorValues.invalid_password, HttpStatus.BAD_REQUEST);
-            const userExistance = await this.userService.getUserByEmail(createUserDto?.email);
+            const { email, password } = createUserDto;
+            if (!this.validatePassword(password)) throw new HttpException(HttpErrorValues.invalid_password, HttpStatus.BAD_REQUEST);
+            const userExistance = await this.userService.getUserByEmail(email);
             if (userExistance) throw new HttpException(HttpErrorValues.user_already_exists, HttpStatus.BAD_REQUEST);
 
-            const hash = await hashPassword(createUserDto?.password);
+            const hash = await hashPassword(password);
             const user = await this.userService.createUser({ ...createUserDto, password: hash });
 
             return this.generateTokens(user);
